@@ -1,6 +1,5 @@
 # HW3 Workflow Architecture (Validation & AI Processing)
 
-(You can copy the code below and paste it into https://mermaid.live to get the beautiful colored diagram for your Word report!)
 
 ```mermaid
 flowchart TD
