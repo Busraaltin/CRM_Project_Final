@@ -1,61 +1,107 @@
-# HW3 – Logic & Intelligent Processing
+# Final Project & HW3 – Intelligent Lead Capture CRM Pipeline
 
-This repository contains the complete implementation for HW3. It upgrades the basic webhook receiver into an intelligent, validation-aware CRM data pipeline using the Google Gemini AI API.
+This repository contains the complete implementation for **HW3** and the **Final Project**. It upgrades a basic webhook receiver into an intelligent, validation-aware CRM data pipeline utilizing the Google Gemini 2.5 Flash API, local SQLite relational storage, automatic follow-up email dispatch, and Google Sheets integration.
 
-## 1. Required Architecture & Workflow Diagram
+---
 
-The system strictly follows the required architecture:
-**Input ({name, email, message}) → Validation (Email/Format Check) → AI Analysis (Intent/Urgency) → CRM/Sheets (Full Record + Metadata).**
+## 🎯 Required Architecture & Workflow
 
-*Note: You can double-click the `hw3_diagram.html` file in your folder to view this flowchart in full color in your web browser!*
+The pipeline strictly fulfills the following workflow:
+**`Input ({name, email, message}) → Validation (Email/Format Check) → AI Classification (Intent/Urgency) → AI Email Draft → Save to SQLite & Google Sheets → Create Email or Task`**
+
+*Note: You can double-click the `hw3_diagram.html` file in your folder to view the flowchart in full color in your web browser!*
 
 ```mermaid
 flowchart TD
-    A[1. Input] -->|Sends {name, email, message}| B{2. Validation}
+    classDef trigger fill:#FFE082,stroke:#F57F17,stroke-width:2px,color:#000000
+    classDef decision fill:#FFCC80,stroke:#EF6C00,stroke-width:2px,color:#000000
+    classDef ai fill:#C5E1A5,stroke:#558B2F,stroke-width:2px,color:#000000
+    classDef server fill:#81D4FA,stroke:#0288D1,stroke-width:2px,color:#000000
+    classDef storage fill:#BCAAA4,stroke:#4E342E,stroke-width:2px,color:#000000
+    classDef invalid fill:#EF9A9A,stroke:#C62828,stroke-width:2px,color:#000000
+
+    A["1. Input Gateway<br/>(POST /submit)"]:::trigger -->|"Receives {name, email, message}"| B{"2. Validation Gateway"}:::decision
     
-    B -->|Missing Field or Invalid Email| C[System Marks Data as 'Invalid']
-    C -->|Bypasses AI Analysis| E
+    %% Invalid Path
+    B -->|"Missing Field or<br/>Invalid Email"| C["System Marks Lead as 'Invalid'"]:::invalid
+    C -->|"Bypasses AI Pipeline<br/>(Saves API Quota)"| H["Save Lead Record<br/>(Status & Errors)"]:::server
     
-    B -->|Email & Format Check Passes| D[3. AI Analysis]
-    D -->|Gemini Extracts Intent & Urgency| E[4. CRM / Sheets Integration]
+    %% Valid Path
+    B -->|"Validation Passes"| D["3. AI Classification<br/>(Gemini 2.5 Flash)"]:::ai
+    D -->|"Extracts Intent & Urgency"| E["4. AI Follow-up Draft<br/>(Gemini 2.5 Flash)"]:::ai
+    E -->|"Generates Personalized Email"| H
     
-    E -->|Saves Full Record + Metadata| F[(Local SQLite Database)]
-    E -->|Appends Full Record + Metadata| G[(Google Sheets CRM)]
+    %% Storage & Actions
+    H -->|"Commits Lead Data"| F[("SQLite DB: leads table")]:::storage
+    H -->|"If Lead is Valid"| I["5. Task Creator"]:::server
+    I -->|"Creates Follow-up Task"| G[("SQLite DB: tasks table")]:::storage
+    
+    H -->|"If EMAIL_USER/PASS exists"| J["6. Nodemailer Transporter"]:::server
+    J -->|"Sends Auto-response"| K["Customer's Inbox"]:::trigger
+    
+    H -->|"Triggers Webhook Sync"| L[("Google Sheets CRM")]:::storage
+    
+    F --> M["7. Final API Response"]:::trigger
+    G --> M
+    L --> M
 ```
 
 ---
 
-## 2. Main Files and Endpoints (System Documentation)
+## 🎯 Environment Variables (`.env`)
 
-*   **`hw3_server.js` (Core Engine):** The main Node.js application. It runs a local web server, receives JSON payloads, performs strict validation (email and missing fields), communicates with Gemini AI, and routes the data to SQLite and Google Sheets.
-*   **`hw3_diagram.html`:** The visual, browser-friendly representation of the system's workflow architecture.
-*   **`database_hw3.sqlite`:** The completely separate local SQLite database file for this homework.
-*   **Port 3002 Configuration:** The server explicitly uses **Port 3002** instead of 3000 or 3001. This is a deliberate architectural choice to completely isolate HW3 from previous homework (HW1/HW2) background processes, preventing `EADDRINUSE` (Address already in use) crashing errors during live presentations.
+Create a `.env` file in the root of the project:
 
-### Main Endpoint
-*   **`POST /submit` (http://localhost:3002/submit)**
-    *   **Purpose:** The single entry point for receiving form data.
-    *   **Behavior:** It runs the payload through the validation firewall. If valid, it triggers AI analysis. Finally, it commits the entire record to storage.
+```env
+GEMINI_API_KEY=<your-google-gemini-api-key>
+GOOGLE_SCRIPT_URL=<your-google-apps-script-web-app-url>
+EMAIL_USER=<your-gmail-address>                  # Optional - for actual auto-responses
+EMAIL_PASS=<your-gmail-app-password>             # Optional - Gmail App Password
+```
+
+> **Note:** If `EMAIL_USER` and `EMAIL_PASS` are omitted, the pipeline still generates the personalized email draft, saves it to SQLite, and logs a task—it simply skips the actual email dispatch without throwing any errors.
 
 ---
 
-## 3. How to Run and Test (Live Walkthrough with Postman)
+## 🎯 Project Structure & Deliverables
 
-To fulfill the **"Show at least one test case"** and **"Walk through each step live"** requirements, follow these exact steps during your presentation.
+- **`hw3_server.js`**: The main Node.js application running on **Port 3002** (isolated to prevent port conflicts).
+- **`HW3_Report.md`**: Academic report outlining AI prompt strategies, validation rules, and relational schemas.
+- **`hw3_workflow_uml.md`**: Mermaid markup file documenting the workflow diagram.
+- **`hw3_diagram.html`**: Interactive workflow flowchart.
+- **`database_hw3.sqlite`**: Local relational SQLite database.
+- **`package.json`**: Lists Node.js dependencies (`sqlite3`, `dotenv`, `nodemailer`).
 
-### Step 1: Start the Webhook Server
-Open a terminal in VS Code and run:
+---
+
+## 🎯 Endpoints Overview
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/submit` | Main pipeline. Receives, validates, classifies, drafts, and saves leads. |
+| `GET` | `/leads` | Displays all recorded leads from SQLite. |
+| `GET` | `/tasks` | Displays all follow-up tasks from SQLite. |
+
+---
+
+## 🎯 Step-by-Step Running & Testing
+
+### 1. Install Dependencies
+Open a terminal in the project directory and run:
+```bash
+npm install
+```
+
+### 2. Start the Server
 ```bash
 node hw3_server.js
 ```
-*(Leave this terminal open. It will print "HW3 Sunucusu çalışıyor! Port: 3002")*
+*(Server will listen on port 3002).*
 
-### Step 2: Live Testing via Postman
-Open Postman, set the method to **POST**, the URL to `http://localhost:3002/submit`, and the Body format to **raw > JSON**.
+### 3. Test Cases (Postman or curl)
 
-#### 🔴 Test Case 1: Invalid Input (Testing the Validation Check)
-*Demonstrates that the system marks bad data.*
-Paste this JSON and click Send:
+#### 🔴 Test Case 1: Invalid Input (Bypass check)
+Paste this payload in a `POST http://localhost:3002/submit` request:
 ```json
 {
   "name": "Ahmet Yilmaz",
@@ -63,11 +109,10 @@ Paste this JSON and click Send:
   "message": "Sisteme giriş yapamıyorum."
 }
 ```
-**Expected Result:** The system will return a `status: "Invalid"` and record the error `"Invalid email format"`. It intentionally skips the AI step.
+**Expected Result:** The system flags the invalid email, marks `status: "Invalid"`, skips the Gemini AI step entirely, saves to SQLite with validation errors, and returns a summary JSON.
 
-#### 🟢 Test Case 2: Valid Input (Testing the AI Analysis)
-*Demonstrates that valid data is categorized into specific fields.*
-Delete the previous JSON, paste this new JSON, and click Send:
+#### 🟢 Test Case 2: Valid Input (AI Pipeline & Automation)
+Send this payload:
 ```json
 {
   "name": "Busra Demir",
@@ -75,4 +120,24 @@ Delete the previous JSON, paste this new JSON, and click Send:
   "message": "Şirketimiz için Enterprise paketinizle ilgileniyoruz, acil olarak fiyat teklifi alabilir miyiz?"
 }
 ```
-**Expected Result:** The system successfully validates the email, sends the message to the Gemini AI, and returns the categorized data: `intent: "Sales"` and `urgency: "High"`. This full data is then saved to the Google Sheets CRM.
+**Expected Result:** 
+- Email passes validation.
+- Gemini AI classifies as `intent: "Sales"` and `urgency: "High"`.
+- Gemini AI generates a personalized follow-up email draft.
+- SQLite saves the lead record.
+- A task with high priority is automatically logged in the `tasks` table.
+- Email is automatically dispatched via Nodemailer (if credentials are set).
+- Full dataset is synced to Google Sheets.
+
+---
+
+## 🎯 Live Presentation & Step-by-Step Walkthrough Guide
+
+Use this structure to walk through your workflow live during evaluation:
+
+1. **Giriş (Intro):** Explain the objective: Building an intelligent CRM gateway that captures, validates, and processes incoming leads with Gemini AI and syncs them to bulut CRM (Google Sheets).
+2. **Step 1: Input Trigger:** Send a webhook request (`POST /submit`).
+3. **Step 2: Validation Firewall:** Demonstrate the bypass check by sending an invalid email. Point out that the system sets `status: "Invalid"` and intentionally skips Gemini AI processing to save budget.
+4. **Step 3: AI Sınıflandırma:** Send a valid inquiry. Point out that Gemini AI successfully extracts `intent` and `urgency` on the fly.
+5. **Step 4: AI E-posta Taslağı:** Show the custom 3-5 sentence follow-up email draft, explaining how the AI tone dynamically changes based on the urgency level (e.g. urgent/empathetic for High priority).
+6. **Step 6: CRM / Database Persistence:** Show the data committed locally in the SQLite `leads` and `tasks` tables, and show the automatic synchronization to Google Sheets under the exact requested column layout (C = `organization`, D = `inquiry_message`).

@@ -343,6 +343,7 @@ const server = http.createServer((req, res) => {
             contact_name: payload.name || "N/A",
             contact_email: payload.email || "N/A",
             inquiry_message: payload.message || "N/A",
+            organization: "Busraaltin CRM",
             captured_at: new Date().toISOString(),
             lead_status: leadStatus,
             intent: aiResult.intent,

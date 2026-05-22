@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HW3/Final Intelligent CRM Lead Gateway</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 1.2fr 1.8fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    input, textarea {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+      color: var(--text-main);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    button {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 1.1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    /* Results side */
+    .results-card {
+      min-height: 500px;
+    }
+
+    .results-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      text-align: center;
+      gap: 1rem;
+    }
+
+    .results-placeholder svg {
+      width: 64px;
+      height: 64px;
+      stroke: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .results-content {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+      height: 100%;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      gap: 0.4rem;
+    }
+
+    .badge-valid { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-invalid { background: rgba(239, 68, 68, 0.15); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3); }
+    
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .meta-box {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .meta-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .meta-value {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .email-preview {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .email-header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.8rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .email-body {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
+    .raw-response {
+      font-family: monospace;
+      font-size: 0.8rem;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      border-radius: 8px;
+      max-height: 150px;
+      overflow-y: auto;
+      color: #38bdf8;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border-left-color: white;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Left Card: Form -->
+    <div class="card">
+      <div>
+        <h1>Intelligent CRM</h1>
+        <p class="subtitle">Müşteri taleplerini toplayan, doğrulayan ve yapay zeka ile otomatik sınıflandıran akıllı lead arayüzü.</p>
+        
+        <form id="leadForm">
+          <div class="form-group">
+            <label for="name">Ad Soyad</label>
+            <input type="text" id="name" required placeholder="Örn: Büşra Demir">
+          </div>
+          <div class="form-group">
+            <label for="email">E-posta</label>
+            <input type="email" id="email" required placeholder="Örn: busra@example.com">
+          </div>
+          <div class="form-group">
+            <label for="message">Talebiniz / Mesajınız</label>
+            <textarea id="message" required placeholder="Destek, satış, iş ortaklığı talebinizi detaylıca buraya yazın..."></textarea>
+          </div>
+        </form>
+      </div>
+
+      <button type="button" onclick="submitLead()">
+        <span id="btnText">Gönder & İşle</span>
+        <div class="spinner" id="btnSpinner"></div>
+      </button>
+    </div>
+
+    <!-- Right Card: Live API Results -->
+    <div class="card results-card">
+      <!-- Placeholder when empty -->
+      <div class="results-placeholder" id="placeholder">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21L14.907 18m4.917-11.898L20.25 4.5m-15.65 14L3 21l3.5-3.5m0-11L3 3l3.5 3.5m0 0a1.5 1.5 0 012.122-2.122L12 7.878l2.879-2.879a1.5 1.5 0 112.122 2.122L14.122 10l2.879 2.879a1.5 1.5 0 01-2.122 2.122L12 12.122l-2.879 2.879a1.5 1.5 0 01-2.122-2.122L9.878 10 7 7.122z" />
+        </svg>
+        <p>Henüz bir istek gönderilmedi. Sol taraftaki formu doldurup "Gönder & İşle" butonuna tıklayarak akışı canlı olarak tetikleyebilirsiniz.</p>
+      </div>
+
+      <!-- Real-time results content -->
+      <div class="results-content" id="results">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-weight: 800; font-size: 1.5rem;">Pipeline Analiz Sonucu</h2>
+            <div id="statusBadge" class="badge">Valid</div>
+          </div>
+
+          <div class="meta-grid">
+            <div class="meta-box">
+              <p class="meta-title">Yapay Zeka Sınıfı (Intent)</p>
+              <p class="meta-value" id="intentValue" style="color: #a78bfa;">Sales</p>
+            </div>
+            <div class="meta-box">
+              <p class="meta-title">Aciliyet Derecesi (Urgency)</p>
+              <p class="meta-value" id="urgencyValue" style="color: #f472b6;">High</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="email-preview" id="emailArea">
+          <div class="email-header" id="emailSubject">Subject: ...</div>
+          <div class="email-body" id="emailBody">...</div>
+        </div>
+
+        <div>
+          <p style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase;">Ham API Yanıtı (JSON)</p>
+          <pre class="raw-response"><code id="rawCode"></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function submitLead() {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const message = document.getElementById('message').value.trim();
+
+      if (!name || !email || !message) {
+        alert("Lütfen tüm alanları doldurun.");
+        return;
+      }
+
+      // UI state loading
+      const btnText = document.getElementById('btnText');
+      const btnSpinner = document.getElementById('btnSpinner');
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'block';
+
+      try {
+        const response = await fetch('http://localhost:3002/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name, email, message })
+        });
+
+        const result = await response.json();
+        
+        // Show results
+        document.getElementById('placeholder').style.display = 'none';
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.style.display = 'flex';
+
+        // Set status badge
+        const badge = document.getElementById('statusBadge');
+        if (result.status === 'Valid') {
+          badge.className = 'badge badge-valid';
+          badge.innerText = '🟢 Valid (Geçerli)';
+          document.getElementById('emailArea').style.display = 'flex';
+        } else {
+          badge.className = 'badge badge-invalid';
+          badge.innerText = '🔴 Invalid (Geçersiz)';
+          document.getElementById('emailArea').style.display = 'none';
+        }
+
+        // Set AI classification metadata
+        document.getElementById('intentValue').innerText = result.ai_analysis.intent;
+        document.getElementById('urgencyValue').innerText = result.ai_analysis.urgency;
+
+        // Set email preview if valid
+        if (result.email_draft) {
+          const lines = result.email_draft.split('\n');
+          const subject = lines.find(l => l.startsWith('Subject:')) || 'Subject: Auto Response';
+          const bodyIndex = lines.findIndex(l => l.startsWith('Body:'));
+          const body = bodyIndex !== -1 ? lines.slice(bodyIndex + 1).join('\n').trim() : result.email_draft;
+
+          document.getElementById('emailSubject').innerText = subject;
+          document.getElementById('emailBody').innerText = body;
+        }
+
+        // Set raw response
+        document.getElementById('rawCode').innerText = JSON.stringify(result, null, 2);
+
+      } catch (err) {
+        alert("Bağlantı Hatası: Sunucunuzun (node hw3_server.js) çalıştığından ve Port 3002'de dinlediğinden emin olun.");
+      } finally {
+        // UI state done
+        btnText.style.display = 'block';
+        btnSpinner.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
