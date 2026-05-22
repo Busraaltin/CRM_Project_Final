@@ -1,6 +1,6 @@
-# Final Project & HW3 – Intelligent Lead Capture CRM Pipeline
+# Final Project – Intelligent Lead Capture CRM Pipeline
 
-This repository contains the complete implementation for **HW3** and the **Final Project**. It upgrades a basic webhook receiver into an intelligent, validation-aware CRM data pipeline utilizing the Google Gemini 2.5 Flash API, local SQLite relational storage, automatic follow-up email dispatch, and Google Sheets integration.
+This repository contains the complete implementation for the **Final Project**. It upgrades a basic webhook receiver into an intelligent, validation-aware CRM data pipeline utilizing the Google Gemini 2.5 Flash API, local SQLite relational storage, automatic follow-up email dispatch, and Google Sheets integration.
 
 ---
 
@@ -9,7 +9,7 @@ This repository contains the complete implementation for **HW3** and the **Final
 The pipeline strictly fulfills the following workflow:
 **`Input ({name, email, message}) → Validation (Email/Format Check) → AI Classification (Intent/Urgency) → AI Email Draft → Save to SQLite & Google Sheets → Create Email or Task`**
 
-*Note: You can double-click the `hw3_diagram.html` file in your folder to view the flowchart in full color in your web browser!*
+*Note: You can double-click the `final_diagram.html` file in your folder to view the flowchart in full color in your web browser!*
 
 ```mermaid
 flowchart TD
@@ -65,12 +65,13 @@ EMAIL_PASS=<your-gmail-app-password>             # Optional - Gmail App Password
 
 ## 🎯 Project Structure & Deliverables
 
-- **`hw3_server.js`**: The main Node.js application running on **Port 3002** (isolated to prevent port conflicts).
-- **`HW3_Report.md`**: Academic report outlining AI prompt strategies, validation rules, and relational schemas.
-- **`hw3_workflow_uml.md`**: Mermaid markup file documenting the workflow diagram.
-- **`hw3_diagram.html`**: Interactive workflow flowchart.
-- **`database_hw3.sqlite`**: Local relational SQLite database.
-- **`package.json`**: Lists Node.js dependencies (`sqlite3`, `dotenv`, `nodemailer`).
+- **`final_server.js`**: The main Node.js application running on **Port 3002** (isolated to prevent port conflicts).
+- **`FINAL_Report.md`**: Academic report outlining AI prompt strategies, validation rules, and relational schemas.
+- **`final_workflow_uml.md`**: Mermaid markup file documenting the sequence diagram and flowchart.
+- **`final_diagram.html`**: Interactive visual flowchart viewable directly in any web browser.
+- **`test_form.html`**: A premium glassmorphic user interface to test inputs and view real-time API logs.
+- **`final_test.js`**: Programmatic automation testing script.
+- **`package.json`**: Lists Node.js dependencies (`sqlite3`, `dotenv`, `nodemailer`, `@google/generative-ai`, `cors`).
 
 ---
 
@@ -94,7 +95,7 @@ npm install
 
 ### 2. Start the Server
 ```bash
-node hw3_server.js
+node final_server.js
 ```
 *(Server will listen on port 3002).*
 

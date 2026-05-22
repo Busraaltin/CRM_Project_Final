@@ -2,7 +2,7 @@ const PORT = 3002;
 const URL = `http://localhost:${PORT}/submit`;
 
 async function runTests() {
-  console.log("🚀 HW3/Final CRM Pipeline Testleri Başlatılıyor...\n");
+  console.log("🚀 Final CRM Pipeline Testleri Başlatılıyor...\n");
 
   // 🔴 TEST CASE 1: Geçersiz İstek (Hatalı/Eksik E-posta)
   console.log("--------------------------------------------------");

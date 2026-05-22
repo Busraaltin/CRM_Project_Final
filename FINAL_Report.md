@@ -1,6 +1,6 @@
-# Final Project & HW3 – Intelligent CRM Pipeline: Academic Architecture Report
+# Final Project – Intelligent CRM Pipeline: Academic Architecture Report
 
-This report outlines the design, architecture, validation logic, AI prompt strategies, and database schemas of the **Node.js CRM API Server**. The implementation fulfills both the **HW3 – Logic & Intelligent Processing** and the **Final Project – Full Workflow** requirements.
+This report outlines the design, architecture, validation logic, AI prompt strategies, and database schemas of the **Node.js CRM API Server**. The implementation fulfills the **Final Project – Full Workflow** requirements.
 
 ---
 
@@ -68,7 +68,7 @@ sequenceDiagram
 ---
 
 ## 🎯 2. Deliverable Check: Validation Logic & Rules
-The server implements strict validation rules within `validatePayload()` in `hw3_server.js` before executing any AI actions:
+The server implements strict validation rules within `validatePayload()` in `final_server.js` before executing any AI actions:
 
 - **Missing Field Validation:** Enforces that `name`, `email`, and `message` must be present and not consist solely of whitespace (`.trim() === ''`).
 - **Format Check (Regex Email Validation):** Validates email structure using the standard regular expression:
@@ -128,7 +128,7 @@ Return only the Subject and Body. No extra explanation.
 
 ## 🎯 4. Deliverable Check: SQLite & Sheets Data Schema
 
-The SQLite database (`database_hw3.sqlite`) utilizes a relational schema to cleanly separate customer records from operational tasks.
+The SQLite database (`database_final.sqlite`) utilizes a relational schema to cleanly separate customer records from operational tasks.
 
 ### A. SQLite Table Schemas
 
